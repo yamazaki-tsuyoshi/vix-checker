@@ -1,0 +1,105 @@
+
+
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIX Context Checker｜今の相場、歴史はなんと言っているか</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; background: #06080f; color: #e2e8f0; font-family: 'Noto Serif JP', 'Yu Mincho', Georgia, serif; }
+    .header { padding: 32px 24px 24px; text-align: center; border-bottom: 1px solid #1a1f2e; }
+    .header-sub { font-size: 10px; color: #3b82f6; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 10px; font-family: monospace; }
+    .header-title { font-size: 22px; font-weight: 900; color: #f8fafc; letter-spacing: -0.5px; line-height: 1.4; }
+    .header-desc { font-size: 12px; color: #475569; margin-top: 10px; line-height: 1.8; }
+    .container { padding: 24px 20px; max-width: 600px; margin: 0 auto; }
+    .input-box { background: #0d1117; border: 1px solid #1e293b; border-radius: 16px; padding: 22px 20px; margin-bottom: 24px; }
+    .input-label { font-size: 11px; color: #64748b; margin-bottom: 10px; letter-spacing: 2px; }
+    .input-row { display: flex; gap: 12px; }
+    #vixInput { flex: 1; background: #06080f; border: 1px solid #1e293b; border-radius: 10px; padding: 14px 18px; color: #f8fafc; font-size: 28px; font-weight: 900; outline: none; font-family: monospace; -moz-appearance: textfield; }
+    #vixInput::-webkit-inner-spin-button { -webkit-appearance: none; }
+    #checkBtn { background: linear-gradient(135deg, #1d4ed8, #2563eb); border: none; border-radius: 10px; padding: 14px 22px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; }
+    .input-note { font-size: 11px; color: #334155; margin-top: 8px; }
+    #result { display: none; }
+    .lv-card { border-radius: 16px; padding: 22px 20px; margin-bottom: 14px; }
+    .level-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .emoji { font-size: 36px; }
+    .badge { font-size: 12px; font-weight: 800; padding: 3px 14px; border-radius: 30px; margin-right: 10px; }
+    .vix-num { font-size: 24px; font-weight: 900; font-family: monospace; }
+    .level-label { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+    .description { font-size: 13px; color: #94a3b8; line-height: 1.8; padding-top: 14px; }
+    .buy-card { border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+    .buy-title { font-size: 11px; letter-spacing: 2px; margin-bottom: 10px; opacity: 0.8; }
+    .buy-amount { font-size: 20px; font-weight: 900; }
+    .buy-note { font-size: 11px; color: #64748b; margin-top: 6px; }
+    .buy-caution { font-size: 11px; color: #475569; margin-top: 12px; padding-top: 10px; line-height: 1.7; }
+    .hist-card { background: #0d1117; border: 1px solid #1e293b; border-radius: 16px; padding: 20px; margin-bottom: 14px; }
+    .hist-title { font-size: 11px; color: #475569; letter-spacing: 3px; margin-bottom: 14px; }
+    .hist-item { background: #06080f; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+    .hist-item:last-child { margin-bottom: 0; }
+    .hist-name { font-size: 14px; font-weight: 800; color: #f8fafc; margin-bottom: 8px; }
+    .hist-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .h-label { font-size: 10px; color: #475569; margin-bottom: 3px; }
+    .h-val { font-size: 11px; color: #94a3b8; }
+    .h-drop { font-size: 11px; color: #ef4444; font-weight: 700; }
+    .h-rec { font-size: 11px; color: #34d399; font-weight: 700; }
+    .hist-foot { font-size: 10px; color: #334155; margin-top: 10px; }
+    .msg-card { border-radius: 16px; padding: 24px 22px; margin-bottom: 30px; }
+    .msg-label { font-size: 11px; letter-spacing: 3px; margin-bottom: 14px; opacity: 0.8; }
+    .msg-text { font-size: 15px; color: #cbd5e1; line-height: 2.1; }
+    .msg-footer { margin-top: 20px; padding-top: 16px; font-size: 13px; font-weight: 700; text-align: center; }
+    @media (max-width: 480px) { .hist-grid { grid-template-columns: 1fr; } .header-title { font-size: 19px; } }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-sub">VIX Context Checker</div>
+  <div class="header-title">今の相場、<br>歴史はなんと言っているか</div>
+  <div class="header-desc">VIX（恐怖指数）の現在値を入力してください。<br>過去の類似場面と、続けるための言葉をお届けします。</div>
+</div>
+<div class="container">
+  <div class="input-box">
+    <div class="input-label">VIX現在値を入力</div>
+    <div class="input-row">
+      <input type="number" id="vixInput" placeholder="例：32.5" step="0.1" min="0">
+      <button id="checkBtn" onclick="check()">確認する</button>
+    </div>
+    <div class="input-note">※ VIX値はCBOEや各種金融サイトで確認できます</div>
+  </div>
+  <div id="result"></div>
+</div>
+<script>
+const S = [
+  { min:0,max:24,level:"平穏",color:"#64748b",accent:"#94a3b8",bg:"linear-gradient(135deg,#1e293b,#0f172a)",border:"#334155",emoji:"🌤",label:"通常の相場環境",buy:null,desc:"市場は落ち着いています。特別な恐怖は広がっていません。",hist:[{name:"平常時",period:"2012〜2019年の多くの期間",drop:"−5〜15%程度の調整",rec:"数週間〜数ヶ月"}],msg:"今は嵐ではなく、普通の空です。\nこういう静かな時期に、コツコツ積み立てていることが、あとで大きな力になります。\n焦らず、続けることが一番の正解です。"},
+  { min:25,max:29,level:"やや警戒",color:"#eab308",accent:"#fde047",bg:"linear-gradient(135deg,#1c1a00,#111000)",border:"#713f12",emoji:"🌥",label:"平常より少し高い水準",buy:{label:"余剰資金の5%",note:"逆イールド警戒局面（2022年）など"},desc:"市場にやや緊張感が出てきました。ニュースが少し気になり始める頃かもしれません。",hist:[{name:"2022年逆イールド警戒局面",period:"2022年前半",drop:"約−15〜20%",rec:"約6〜12ヶ月"}],msg:"少し不安になってきた頃でしょうか。\nその気持ち、わかります。画面の数字が気になり始めますよね。\nでも歴史を振り返ると、このくらいの揺れは何度も起きています。\nそして、続けた人はちゃんと報われています。今すぐ焦らなくていい。"},
+  { min:30,max:34,level:"警戒モード",color:"#f97316",accent:"#fb923c",bg:"linear-gradient(135deg,#1c0a00,#110600)",border:"#9a3412",emoji:"🌦",label:"市場が本格的に警戒し始める水準",buy:{label:"余剰資金の10%",note:"2022年利上げショック、米イランショック（2026年）相当"},desc:"投資家の不安が高まっています。経済ニュースが悲観的になってきた頃です。",hist:[{name:"2022年利上げショック",period:"2022年通年",drop:"約−25%",rec:"約1〜1.5年"},{name:"米イランショック",period:"2026年",drop:"30台前半で推移",rec:"数ヶ月以内が多い"}],msg:"「売ってしまおうか」という気持ちが頭をよぎる頃です。\nでも、2022年の利上げショックを乗り越えた人は、その後の回復をしっかり受け取りました。\n不安なのは、あなただけではありません。世界中の投資家が同じ気持ちです。\nだからこそ、ルール通りに動くことが力になります。"},
+  { min:35,max:39,level:"不安増大",color:"#ef4444",accent:"#fca5a5",bg:"linear-gradient(135deg,#1c0000,#110000)",border:"#991b1b",emoji:"⛈",label:"投資家心理が急速に悪化",buy:{label:"さらに余剰資金の10%",note:"ギリシャ危機（2010年・約45）手前の水準"},desc:"市場全体に恐怖が広がっています。下落ニュースが連日続くような局面です。",hist:[{name:"ギリシャ危機前夜",period:"2010年春",drop:"約−15〜20%（欧米株）",rec:"約6ヶ月〜1年"},{name:"2018年末急落",period:"2018年10〜12月",drop:"約−20%",rec:"約4〜5ヶ月"}],msg:"ニュースを見るのがつらくなってきた頃だと思います。\nSNSにも悲観的な声が増えているかもしれません。\nでも覚えていてください。過去にこの水準を乗り越えた人たちは、必ず次の上昇を受け取っています。\n嵐の中で踏みとどまることが、長期投資の核心です。"},
+  { min:40,max:49,level:"パニックモード",color:"#dc2626",accent:"#f87171",bg:"linear-gradient(135deg,#1a0000,#0d0000)",border:"#7f1d1d",emoji:"🌩",label:"歴史的な恐怖局面に近い水準",buy:{label:"さらに余剰資金の10%",note:"9.11（2001年・約43）、ITバブル崩壊（2002年・約45）、チャイナショック（2015年・約50）相当"},desc:"9.11やITバブル崩壊に匹敵する恐怖感です。多くの投資家が損切りを検討する局面です。",hist:[{name:"9.11テロショック",period:"2001年9月",drop:"約−15%（急落）",rec:"約1〜2ヶ月"},{name:"ITバブル崩壊",period:"2000〜2002年",drop:"約−50%（ナスダック）",rec:"約5〜7年"},{name:"チャイナショック",period:"2015年夏",drop:"約−12%",rec:"約6ヶ月"}],msg:"今、本当に怖い思いをしているはずです。\nでも、9.11の翌月、市場は戻り始めました。\nチャイナショックも、半年後には落ち着きました。\n「今回は違う」と思いたくなる気持ちもわかります。でも歴史は、続けた人の味方をしてきました。\nあなたのルールが、今あなたを守っています。"},
+  { min:50,max:59,level:"深刻な危機",color:"#c026d3",accent:"#e879f9",bg:"linear-gradient(135deg,#1a0020,#0d0015)",border:"#7e22ce",emoji:"⚡",label:"チャイナショック・日銀ショック級",buy:{label:"さらに余剰資金の10%",note:"チャイナショック（2015年・約50）、2024年日銀ショック（約65）相当"},desc:"歴史に残る恐怖局面です。報道は連日「○○ショック」と表現するような状況かもしれません。",hist:[{name:"チャイナショック",period:"2015年8月",drop:"約−12%（S&P500）",rec:"約6ヶ月"},{name:"2024年日銀ショック",period:"2024年8月",drop:"約−10%（日本株は一時−20%超）",rec:"約1〜2ヶ月"}],msg:"この水準まで来たなら、本当に怖いと思います。\nそれは正常な反応です。誰でも怖い。\nでも2024年の日銀ショックを覚えていますか？\n当時「終わりだ」と感じた人も多かった。でも2ヶ月も経たないうちに戻りました。\n怖いからこそ、ルールが力を発揮する場面です。あなたはここまで来た。もう少しだけ、信じてください。"},
+  { min:60,max:74,level:"歴史的恐怖",color:"#7c3aed",accent:"#a78bfa",bg:"linear-gradient(135deg,#0f0020,#07001a)",border:"#5b21b6",emoji:"🌪",label:"トランプ関税ショック級・歴史的に稀な水準",buy:{label:"さらに余剰資金の10%",note:"トランプ関税ショック（2025年・約60）相当。この水準は歴史的にも稀"},desc:"VIX60台は、ほとんどの投資家が生涯で数回しか経験しない極限の局面です。",hist:[{name:"トランプ関税ショック",period:"2025年4月",drop:"約−20%前後",rec:"数ヶ月〜1年（回復途上）"}],msg:"今あなたが経験していることは、投資家として生涯でも数回しかない局面です。\n2025年のトランプ関税ショックを思い出してください。\nあの時も世界が終わるような報道が溢れました。\nでも市場は、いつも「まだ終わっていない」ことを証明してきました。\n今この瞬間、持ち続けているあなたは、すでに強い投資家です。"},
+  { min:75,max:999,level:"極限の恐怖",color:"#1d4ed8",accent:"#93c5fd",bg:"linear-gradient(135deg,#00001a,#000010)",border:"#1e3a8a",emoji:"🌑",label:"コロナ・リーマン級。史上最大級の恐怖",buy:{label:"残り全額・最終弾",note:"コロナショック（2020年・約85）、リーマンショック（2008年・約89）相当"},desc:"リーマンショック・コロナショック級の極度の恐怖です。歴史上でも最も稀な局面のひとつです。",hist:[{name:"コロナショック",period:"2020年3月（VIX最大約85）",drop:"約−34%",rec:"約5ヶ月で最高値更新"},{name:"リーマンショック",period:"2008〜2009年（VIX最大約89）",drop:"約−57%",rec:"約4〜5年"}],msg:"今、世界中が震えています。\nリーマンショックの時、多くの人が「もう投資はやめよう」と決めました。\nでもその後4〜5年で市場は完全に回復し、さらに上を目指しました。\nコロナショックはわずか5ヶ月で最高値を更新しました。\n歴史上、どんな暴落も「最後の暴落」にはなりませんでした。\n\nこれがあなたの最終弾です。\n全力で信じてください。長期投資の歴史は、続けた人の味方です。"},
+];
+
+document.getElementById(‘vixInput’).addEventListener(‘keydown’, e => { if(e.key===‘Enter’) check(); });
+
+function check() {
+const val = parseFloat(document.getElementById(‘vixInput’).value);
+if (isNaN(val) || val < 0) return;
+const s = S.find(x => val >= x.min && val <= x.max);
+if (!s) return;
+
+const histHTML = s.hist.map(h => ` <div class="hist-item"> <div class="hist-name">${h.name}</div> <div class="hist-grid"> <div><div class="h-label">時期</div><div class="h-val">${h.period}</div></div> <div><div class="h-label">下落率</div><div class="h-drop">${h.drop}</div></div> <div><div class="h-label">回復期間</div><div class="h-rec">${h.rec}</div></div> </div> </div>`).join(’’);
+
+const buyHTML = s.buy ? ` <div class="buy-card" style="background:${s.color}10;border:1px solid ${s.color}40"> <div class="buy-title" style="color:${s.color}">買い増しルール</div> <div class="buy-amount" style="color:${s.accent}">${s.buy.label}</div> <div class="buy-note">${s.buy.note}</div> <div class="buy-caution" style="border-top:1px solid ${s.color}20">※ 買い増しはあくまで参考です。相場が怖い時、持ち続けるだけで十分に正しい選択です。</div> </div>` : ` <div class="buy-card" style="background:#0d1117;border:1px solid #1e293b"> <div class="buy-title" style="color:#475569">買い増しルール</div> <div style="font-size:15px;color:#475569">通常積立のみ。買い増しは待機。</div> </div>`;
+
+document.getElementById(‘result’).innerHTML = ` <div class="lv-card" style="background:${s.bg};border:1px solid ${s.border}"> <div class="level-row"> <div class="emoji">${s.emoji}</div> <div> <div><span class="badge" style="background:${s.color}25;border:1px solid ${s.color}60;color:${s.color}">${s.level}</span><span class="vix-num" style="color:${s.accent}">VIX ${val}</span></div> <div class="level-label">${s.label}</div> </div> </div> <div class="description" style="border-top:1px solid ${s.border}">${s.desc}</div> </div> ${buyHTML} <div class="hist-card"> <div class="hist-title">過去の類似場面</div> ${histHTML} <div class="hist-foot">※ 参考値です。将来の回復を保証するものではありません。</div> </div> <div class="msg-card" style="background:${s.color}08;border:1px solid ${s.color}30"> <div class="msg-label" style="color:${s.color}">あなたへのメッセージ</div> <div class="msg-text">${s.msg.replace(/\n/g,'<br>')}</div> <div class="msg-footer" style="border-top:1px solid ${s.color}20;color:${s.color}">続けることが、最大の戦略です。</div> </div>`;
+
+document.getElementById(‘result’).style.display = ‘block’;
+document.getElementById(‘result’).scrollIntoView({behavior:‘smooth’,block:‘start’});
+}
+</script>
+
+</body>
+</html>
